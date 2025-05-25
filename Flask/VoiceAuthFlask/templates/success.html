@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Access Granted</title>
+  <style>
+    :root {
+      --success-color: #28a745;
+      --success-color-dark: #218838;
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #f8f9fa;
+      --shadow-color: rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%, rgba(40, 167, 69, 0.1), transparent 70%);
+      z-index: -1;
+    }
+
+    .container {
+      text-align: center;
+      background-color: var(--card-bg);
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px var(--shadow-color);
+      max-width: 90%;
+      width: 400px;
+      animation: fadeIn 0.6s ease-out;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      border-radius: 50%;
+      background-color: rgba(40, 167, 69, 0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .success-icon::before {
+      content: "";
+      width: 30px;
+      height: 15px;
+      border-left: 4px solid var(--success-color);
+      border-bottom: 4px solid var(--success-color);
+      transform: rotate(-45deg);
+      position: absolute;
+      top: 28px;
+      left: 25px;
+      animation: checkmark 0.8s ease-in-out forwards;
+      opacity: 0;
+    }
+
+    @keyframes checkmark {
+      0% { opacity: 0; transform: rotate(-45deg) scale(0.5); }
+      50% { opacity: 1; transform: rotate(-45deg) scale(1.2); }
+      100% { opacity: 1; transform: rotate(-45deg) scale(1); }
+    }
+
+    h1 {
+      color: var(--success-color);
+      margin-bottom: 1rem;
+      font-size: 2rem;
+      font-weight: 600;
+    }
+
+    p {
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: var(--success-color);
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover {
+      background-color: var(--success-color-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      animation: ripple 0.6s linear;
+      background-color: rgba(255, 255, 255, 0.7);
+      pointer-events: none;
+    }
+
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 2rem;
+        width: 90%;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <div class="success-icon" aria-hidden="true"></div>
+    <h1>Access Granted</h1>
+    <p>You have successfully authenticated to the system. You now have access to all authorized resources.</p>
+    <a href="/" class="btn" id="homeBtn">Back to Home</a>
+  </div>
+
+  <script>
+    // Add ripple effect to button
+    document.getElementById('homeBtn').addEventListener('click', function(e) {
+      const button = e.currentTarget;
+      const circle = document.createElement('span');
+      const diameter = Math.max(button.clientWidth, button.clientHeight);
+      const rect = button.getBoundingClientRect();
+
+      circle.style.width = circle.style.height = `${diameter}px`;
+      circle.style.left = `${e.clientX - rect.left - diameter / 2}px`;
+      circle.style.top = `${e.clientY - rect.top - diameter / 2}px`;
+      circle.classList.add('ripple');
+
+      const existingRipple = button.querySelector('.ripple');
+      if (existingRipple) existingRipple.remove();
+
+      button.appendChild(circle);
+    });
+
+    // Announce success to screen readers
+    window.addEventListener('DOMContentLoaded', function() {
+      const announcement = document.createElement('div');
+      announcement.setAttribute('role', 'status');
+      announcement.setAttribute('aria-live', 'polite');
+      announcement.className = 'sr-only';
+      announcement.textContent = 'Authentication successful. Access granted.';
+      document.body.appendChild(announcement);
+
+      setTimeout(() => announcement.remove(), 3000);
+    });
+  </script>
+</body>
+</html>
