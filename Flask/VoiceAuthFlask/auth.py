@@ -12,6 +12,7 @@ from datetime import datetime
 import logging
 from PIL import Image, ImageTk
 from tkinter import messagebox
+import time
 from database import save_user_data, get_user_data
 
 # Setup logging
@@ -389,6 +390,64 @@ class AuthHandler:
         except Exception as e:
             messagebox.showerror("Error", f"Login failed: {str(e)}", parent=window)
             self.log_status(f"Login failed: {str(e)}", status_text)
+            return False
+        finally:
+            progress_bar.pack_forget()
+            window.destroy()
+            window.master.deiconify()
+
+    def run_password_reset(self, email, status_text, progress_bar, window, image_label):
+        """Reset voice setup with OTP verification."""
+        from email_otp import send_otp
+        import tkinter.simpledialog as simpledialog
+
+        self.status_text = status_text
+        self.log_status(f"Starting password reset for {email}...", status_text)
+        try:
+            user_data = get_user_data(email)
+            if not user_data:
+                messagebox.showerror("Error", "Email not found in the system.", parent=window)
+                self.log_status("Reset failed: User not found.", status_text)
+                return False
+
+            progress_bar.pack(pady=10)
+            progress_bar["value"] = 0
+            window.update()
+
+            otp = send_otp(email)
+            if not otp:
+                messagebox.showerror("Error", "Failed to send OTP. Check your email setup.", parent=window)
+                self.log_status("Reset failed: OTP not sent.", status_text)
+                progress_bar.pack_forget()
+                return False
+
+            progress_bar["value"] = 50
+            window.update()
+
+            user_input = simpledialog.askstring("OTP Verification", "Enter the OTP sent to your email:", parent=window)
+            if user_input != otp:
+                self.log_status("Incorrect OTP. Capturing intruder photo...", status_text)
+                self.capture_intruder(image_label)
+                messagebox.showerror("Error", "Incorrect OTP. Intruder alert!", parent=window)
+                progress_bar.pack_forget()
+                return False
+
+            self.log_status("OTP verified. Starting setup phase.", status_text)
+            progress_bar["value"] = 75
+            window.update()
+
+            # Run signup process to reset voice and phrase
+            success = self.run_signup(email, status_text, progress_bar, window, image_label)
+            if success:
+                self.log_status("Password reset completed successfully!", status_text)
+                messagebox.showinfo("Success", "Password reset completed successfully!", parent=window)
+            else:
+                self.log_status("Password reset failed during signup.", status_text)
+                messagebox.showerror("Error", "Password reset failed. Please try again.", parent=window)
+            return success
+        except Exception as e:
+            messagebox.showerror("Error", f"Password reset failed: {str(e)}", parent=window)
+            self.log_status(f"Password reset failed: {str(e)}", status_text)
             return False
         finally:
             progress_bar.pack_forget()

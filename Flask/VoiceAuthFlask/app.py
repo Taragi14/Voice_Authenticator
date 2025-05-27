@@ -1,11 +1,16 @@
+import os
 from flask import Flask, render_template
 import tkinter as tk
 import threading
 from ui import VoiceAuthUI
 from auth import AuthHandler
+from database import init_db
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key'  # Replace with a secure key
+app.secret_key = os.getenv('FLASK_SECRET_KEY', 'your-secret-key')  # Use environment variable for security
+
+# Initialize database
+init_db()
 
 # Initialize Tkinter, AuthHandler, and VoiceAuthUI
 root = tk.Tk()
